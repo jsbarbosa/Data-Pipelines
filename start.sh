@@ -7,6 +7,7 @@ export AIRFLOW_HOME="$PWD"
 AIRFLOW=".venv/lib/python3.8/site-packages/airflow/bin/airflow"
 
 # Start airflow
+$AIRFLOW db init
 $AIRFLOW scheduler --daemon
 $AIRFLOW webserver --daemon -p 3000
 
