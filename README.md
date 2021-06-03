@@ -7,3 +7,47 @@ The source data resides in S3 and needs to be processed in Sparkify's data wareh
 
 Steps required for the ETL are shown below:
 ![DAG](example-dag.png "DAG")
+
+## Installation
+Run `install.sh`:
+```
+./install.sh
+```
+
+Modify the following variables in `airflow.cfg`:
+```
+task_runner = StandardTaskRunner
+secret_key = N9baWahK5oABT+Jn1lR2Qg==
+```
+
+### Configure credentials
+Go to [http://localhost:3000/admin/connection/](http://localhost:3000/admin/connection/)
+and click Create.
+
+#### S3
+- **Conn Id:** `aws`
+- **Conn Type:** `Amazon Web Services`
+- **Login:** `<ACCESS_KEY>`
+- **Password:** `<SECRET_ACCESS>`
+
+#### Redshift
+- **Conn Id:** `redshift`
+- **Conn Type:** Postgres`
+- **Host:** `<Endpoint>`
+- **Schema:** `dev`
+- **Login:** `awsuser`
+- **Password:** `<Password>`
+- **Port:** `5439`
+
+
+## Start Airflow
+Run `start.sh`
+```
+./start.sh
+```
+
+## Stop Airflow
+Run `stop.sh`
+```
+./stop.sh
+```
