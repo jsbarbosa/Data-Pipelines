@@ -2,25 +2,31 @@ from datetime import datetime, timedelta
 import os
 from airflow import DAG
 from airflow.operators.dummy_operator import DummyOperator
-from airflow.operators import (StageToRedshiftOperator, LoadFactOperator,
-                                LoadDimensionOperator, DataQualityOperator)
-from helpers import SqlQueries
+from operators import StageToRedshiftOperator, LoadFactOperator, LoadDimensionOperator, DataQualityOperator
+from helpers import SQLQueries
 
-# AWS_KEY = os.environ.get('AWS_KEY')
-# AWS_SECRET = os.environ.get('AWS_SECRET')
+AWS_KEY = os.environ.get('AWS_KEY')
+AWS_SECRET = os.environ.get('AWS_SECRET')
 
 default_args = {
     'owner': 'udacity',
-    'start_date': datetime(2019, 1, 12),
+    # 'start_date': datetime(2019, 1, 12),
+
+    'start_date': datetime.now(),
 }
 
-dag = DAG('udac_example_dag',
-          default_args=default_args,
-          description='Load and transform data in Redshift with Airflow',
-          schedule_interval='0 * * * *'
-        )
+dag = DAG(
+    'udac_example_dag',
+    default_args=default_args,
+    description='Load and transform data in Redshift with Airflow',
+    # schedule_interval='* * * * *'
+    schedule_interval='@once'
+)
 
-start_operator = DummyOperator(task_id='Begin_execution',  dag=dag)
+start_operator = DummyOperator(
+    task_id='Begin_execution',
+    dag=dag
+)
 
 stage_events_to_redshift = StageToRedshiftOperator(
     task_id='Stage_events',
@@ -62,4 +68,17 @@ run_quality_checks = DataQualityOperator(
     dag=dag
 )
 
-end_operator = DummyOperator(task_id='Stop_execution',  dag=dag)
+end_operator = DummyOperator(
+    task_id='Stop_execution',
+    dag=dag
+)
+
+start_operator >> stage_events_to_redshift >> load_songplays_table
+start_operator >> stage_songs_to_redshift >> load_songplays_table
+
+load_songplays_table >> load_song_dimension_table >> run_quality_checks
+load_songplays_table >> load_user_dimension_table >> run_quality_checks
+load_songplays_table >> load_artist_dimension_table >> run_quality_checks
+load_songplays_table >> load_time_dimension_table >> run_quality_checks
+
+run_quality_checks >> end_operator

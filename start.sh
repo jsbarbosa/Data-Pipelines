@@ -4,12 +4,12 @@ source .venv/bin/activate
 
 export AIRFLOW_HOME="$PWD"
 
-AIRFLOW=".venv/lib/python3.8/site-packages/airflow/bin/airflow"
+#;alias airflow=".venv/lib/python3.8/site-packages/airflow/bin/airflow"
 
 # Start airflow
-$AIRFLOW db init
-$AIRFLOW scheduler --daemon
-$AIRFLOW webserver --daemon -p 3000
+airflow db init
+airflow scheduler --daemon
+airflow webserver --daemon -p 3000
 
 # Wait till airflow web-server is ready
 echo "Waiting for Airflow web server..."
