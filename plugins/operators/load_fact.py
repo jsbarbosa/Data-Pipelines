@@ -4,6 +4,10 @@ from airflow.utils.decorators import apply_defaults
 
 
 class LoadFactOperator(BaseOperator):
+    """
+    Class that inserts the Redshift data into the table using the query provided as a parameter
+
+    """
     ui_color = '#F98866'
 
     EXECUTE_STATEMENT: str = "INSERT INTO {table} {query};"
@@ -17,6 +21,17 @@ class LoadFactOperator(BaseOperator):
             *args,
             **kwargs
     ):
+        """
+
+        Parameters
+        ----------
+        redshift_table:
+            table in which the data will be uploaded
+        query:
+            SQL statement with the values to insert
+        redshift_conn_id:
+            reference to the Airflow redshift connection
+        """
         super(LoadFactOperator, self).__init__(*args, **kwargs)
 
         self._redshift_table = redshift_table
@@ -24,6 +39,14 @@ class LoadFactOperator(BaseOperator):
         self._redshift_conn_id = redshift_conn_id
 
     def execute(self, context: dict):
+        """
+        Method that executes the insertion procedure
+
+        Parameters
+        ----------
+        context:
+            Airflow context
+        """
         self.log.info(
             f"Loading fact '{self._redshift_table}' table"
         )
