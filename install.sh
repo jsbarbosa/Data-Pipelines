@@ -3,7 +3,7 @@
 sudo apt update -y
 sudo apt install -y libmysqlclient-dev libssl-dev comerr-dev libsasl2-dev
 
-python3 -m venv .venv
+python -m venv .venv
 
 source .venv/bin/activate
 

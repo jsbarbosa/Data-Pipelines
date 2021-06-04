@@ -2,6 +2,7 @@
 *.log
 *.out
 *.pid
+*.cfg
 
 airflow.cfg
 airflow.db

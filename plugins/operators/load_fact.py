@@ -5,12 +5,14 @@ from airflow.utils.decorators import apply_defaults
 
 class LoadFactOperator(BaseOperator):
     """
-    Class that inserts the Redshift data into the table using the query provided as a parameter
+    Class that inserts the Redshift data into the table using the query provided
+    as a parameter
 
     """
     ui_color = '#F98866'
 
     EXECUTE_STATEMENT: str = "INSERT INTO {table} {query};"
+    _NAME: str = "fact"
 
     @apply_defaults
     def __init__(
@@ -48,7 +50,7 @@ class LoadFactOperator(BaseOperator):
             Airflow context
         """
         self.log.info(
-            f"Loading fact '{self._redshift_table}' table"
+            f"Loading {self._NAME} '{self._redshift_table}' table"
         )
 
         PostgresHook(
