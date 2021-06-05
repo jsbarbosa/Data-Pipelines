@@ -16,6 +16,7 @@ class StageToRedshiftOperator(BaseOperator):
         FROM 's3://{path}'
         ACCESS_KEY_ID '{access_key}'
         SECRET_ACCESS_KEY '{secret_key}'
+        FORMAT AS json '{format}'
         REGION AS '{region}';
     """
 
@@ -26,6 +27,7 @@ class StageToRedshiftOperator(BaseOperator):
             s3_conn_id: str,
             redshift_table: str,
             redshift_conn_id: str,
+            format: str,
             region: str,
             *args,
             **kwargs
@@ -53,6 +55,7 @@ class StageToRedshiftOperator(BaseOperator):
         self._s3_conn_id = s3_conn_id
         self._redshift_table = redshift_table
         self._redshift_conn_id = redshift_conn_id
+        self._format = format
         self._region = region
 
     @property
@@ -70,6 +73,14 @@ class StageToRedshiftOperator(BaseOperator):
     @property
     def redshift_conn_id(self) -> str:
         return self._redshift_conn_id
+
+    @property
+    def format(self) -> str:
+        return self._format
+
+    @property
+    def region(self) -> str:
+        return self._region
 
     def execute(self, context: dict):
         """
@@ -106,6 +117,7 @@ class StageToRedshiftOperator(BaseOperator):
                 path=self._bucket,
                 access_key=aws.access_key,
                 secret_key=aws.secret_key,
+                format=self._format,
                 region=self._region
             ),
             autocommit=True

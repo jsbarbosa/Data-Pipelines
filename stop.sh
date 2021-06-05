@@ -1,4 +1,5 @@
-rm *.err *.log *.out *.pid airflow.db
+rm *.err *.log *.out *.pid
+#airflow.db
 rm -r logs
 
 PIDS=$(ps aux | grep airflow | awk '{print $2}')

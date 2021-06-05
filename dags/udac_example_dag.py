@@ -14,10 +14,10 @@ AWS_SECRET = os.environ.get('AWS_SECRET')
 DEFAULT_ARGS = {
     'owner': 'udacity',
     'depends_on_past': False,
-    'start_date': datetime.now(),
+    'start_date': datetime.utcnow(),
     'retries': 1,
     'retry_delay': timedelta(
-        minutes=1
+        seconds=1
     ),
     'catchup': False
 }
@@ -52,20 +52,22 @@ start_operator = DummyOperator(
 )
 
 stage_events_to_redshift = StageToRedshiftOperator(
-    bucket=f"{S3_BUCKET_NAME}/log_data",
+    bucket=f"{S3_BUCKET_NAME}/log-data",
     s3_conn_id=AWS_CONN_ID,
     redshift_table=STAGING_EVENTS_TABLE,
     redshift_conn_id=REDSHIFT_CONN_ID,
+    format='s3://udacity-dend/log_json_path.json',
     region='us-west-2',
     task_id='Stage_events',
     dag=dag
 )
 
 stage_songs_to_redshift = StageToRedshiftOperator(
-    bucket=f"{S3_BUCKET_NAME}/song_data",
+    bucket=f"{S3_BUCKET_NAME}/song-data",
     s3_conn_id=AWS_CONN_ID,
     redshift_table=STAGING_SONGS_TABLES,
     redshift_conn_id=REDSHIFT_CONN_ID,
+    format='auto',
     region='us-west-2',
     task_id='Stage_songs',
     dag=dag
