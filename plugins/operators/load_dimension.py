@@ -27,7 +27,7 @@ class LoadDimensionOperator(LoadFactOperator):
     def append_data(self) -> bool:
         return self._append_data
 
-    def execute(self):
+    def execute(self, context: dict):
         if self.append_data:
             self.log.info(f"Appending data to table {self._redshift_table}")
         else:
@@ -38,8 +38,9 @@ class LoadDimensionOperator(LoadFactOperator):
             PostgresHook(
                 postgres_conn_id=self._redshift_conn_id
             ).run(
-                f"truncate table {self.table_name};",
-                autocommit=True
+                f"truncate table {self._redshift_table};"
             )
 
-        super(LoadDimensionOperator, self).execute()
+        super(LoadDimensionOperator, self).execute(
+            context
+        )

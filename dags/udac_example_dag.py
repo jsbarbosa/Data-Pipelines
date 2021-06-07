@@ -37,8 +37,8 @@ ARTIST_TABLE: str = "artists"
 APPEND_MODE: bool = False
 
 TESTS: list = [
-    'len(records) > 0'
-    'len(records[0]) > 0'
+    'len(records) > 0',
+    'len(records[0]) > 0',
     'records[0][0] > 0'
 ]
 
