@@ -15,9 +15,9 @@ DEFAULT_ARGS = {
     'owner': 'udacity',
     'depends_on_past': False,
     'start_date': datetime.utcnow(),
-    'retries': 1,
+    'retries': 3,
     'retry_delay': timedelta(
-        seconds=1
+        minutes=5
     ),
     'catchup': False
 }
@@ -33,6 +33,14 @@ USERS_TABLE: str = "users"
 SONGS_TABLE: str = "songs"
 TIME_TABLE: str = "time"
 ARTIST_TABLE: str = "artists"
+
+APPEND_MODE: bool = False
+
+TESTS: list = [
+    'len(records) > 0'
+    'len(records[0]) > 0'
+    'records[0][0] > 0'
+]
 
 
 """
@@ -85,6 +93,7 @@ load_user_dimension_table = LoadDimensionOperator(
     redshift_table=USERS_TABLE,
     query=SQLQueries.user_table_insert,
     redshift_conn_id=REDSHIFT_CONN_ID,
+    append_data=APPEND_MODE,
     task_id='Load_user_dim_table',
     dag=dag
 )
@@ -93,6 +102,7 @@ load_song_dimension_table = LoadDimensionOperator(
     redshift_table=SONGS_TABLE,
     query=SQLQueries.song_table_insert,
     redshift_conn_id=REDSHIFT_CONN_ID,
+    append_data=APPEND_MODE,
     task_id='Load_song_dim_table',
     dag=dag
 )
@@ -101,6 +111,7 @@ load_artist_dimension_table = LoadDimensionOperator(
     redshift_table=ARTIST_TABLE,
     query=SQLQueries.artist_table_insert,
     redshift_conn_id=REDSHIFT_CONN_ID,
+    append_data=APPEND_MODE,
     task_id='Load_artist_dim_table',
     dag=dag
 )
@@ -109,18 +120,19 @@ load_time_dimension_table = LoadDimensionOperator(
     redshift_table=TIME_TABLE,
     query=SQLQueries.time_table_insert,
     redshift_conn_id=REDSHIFT_CONN_ID,
+    append_data=APPEND_MODE,
     task_id='Load_time_dim_table',
     dag=dag
 )
 
 run_quality_checks = DataQualityOperator(
-    tables=[
-        FACT_TABLE,
-        SONGS_TABLE,
-        ARTIST_TABLE,
-        TIME_TABLE,
-        USERS_TABLE
-    ],
+    tests={
+        FACT_TABLE: TESTS,
+        SONGS_TABLE: TESTS,
+        ARTIST_TABLE: TESTS,
+        TIME_TABLE: TESTS,
+        USERS_TABLE: TESTS
+    },
     redshift_conn_id=REDSHIFT_CONN_ID,
     task_id='Run_data_quality_checks',
     dag=dag
@@ -131,12 +143,12 @@ end_operator = DummyOperator(
     dag=dag
 )
 
-start_operator >> stage_events_to_redshift >> load_songplays_table
-start_operator >> stage_songs_to_redshift >> load_songplays_table
-
-load_songplays_table >> load_song_dimension_table >> run_quality_checks
-load_songplays_table >> load_user_dimension_table >> run_quality_checks
-load_songplays_table >> load_artist_dimension_table >> run_quality_checks
-load_songplays_table >> load_time_dimension_table >> run_quality_checks
-
-run_quality_checks >> end_operator
+start_operator >> [
+    stage_events_to_redshift,
+    stage_songs_to_redshift
+] >> load_songplays_table >> [
+    load_song_dimension_table,
+    load_user_dimension_table,
+    load_artist_dimension_table,
+    load_time_dimension_table
+] >> run_quality_checks >> end_operator

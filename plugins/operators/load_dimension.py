@@ -13,3 +13,33 @@ class LoadDimensionOperator(LoadFactOperator):
     ui_color = '#80BD9E'
 
     _NAME = 'dimension'
+
+    @apply_defaults
+    def __init__(self, append_data: bool, *args, **kwargs):
+        super(LoadDimensionOperator, self).__init__(
+            *args,
+            **kwargs
+        )
+
+        self._append_data = append_data
+
+    @property
+    def append_data(self) -> bool:
+        return self._append_data
+
+    def execute(self):
+        if self.append_data:
+            self.log.info(f"Appending data to table {self._redshift_table}")
+        else:
+            self.log.info(
+                f"Truncating table {self._redshift_table}."
+            )
+
+            PostgresHook(
+                postgres_conn_id=self._redshift_conn_id
+            ).run(
+                f"truncate table {self.table_name};",
+                autocommit=True
+            )
+
+        super(LoadDimensionOperator, self).execute()
